@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,16 +22,35 @@
       font-weight: bold;
       margin-top: 20px;
     }
+    #gridDisplay {
+      margin-top: 20px;
+      display: inline-block;
+      border: 1px solid #ccc;
+    }
+    .row {
+      display: flex;
+    }
+    .cell {
+      width: 20px;
+      height: 20px;
+      border: 1px solid #ddd;
+    }
+    .open {
+      background-color: #aef;
+    }
+    .blocked {
+      background-color: #333;
+    }
   </style>
 </head>
 <body>
   <h1>Percolation Probability Simulator</h1>
 
   <label>Number of columns (X):
-    <input type="number" id="columns" value="3" min="1" />
+    <input type="number" id="columns" value="8" min="1" />
   </label>
   <label>Number of cells in each column (Y):
-    <input type="number" id="rows" value="3" min="1" />
+    <input type="number" id="rows" value="8" min="1" />
   </label>
   <label>Probability of water passing each cell (P, 0-1):
     <input type="number" id="probability" value="0.5" min="0" max="1" step="0.01" />
@@ -41,6 +61,7 @@
 
   <button onclick="runSimulation()">Run Simulation</button>
 
+  <div id="gridDisplay"></div>
   <div id="result"></div>
   <div id="theoretical"></div>
 
@@ -95,6 +116,7 @@
         return false;
       }
 
+      // Run simulation
       for (let i = 0; i < N; i++) {
         const grid = createGrid();
         if (hasPercolation(grid)) success++;
@@ -110,6 +132,21 @@
 
       document.getElementById("theoretical").innerText =
         `Theoretical (no interconnection): ${atLeastOne.toFixed(4)}`;
+
+      // Show one random grid
+      const oneGrid = createGrid();
+      const gridDisplay = document.getElementById("gridDisplay");
+      gridDisplay.innerHTML = "";
+      for (let y = 0; y < Y; y++) {
+        const rowDiv = document.createElement("div");
+        rowDiv.className = "row";
+        for (let x = 0; x < X; x++) {
+          const cellDiv = document.createElement("div");
+          cellDiv.className = "cell " + (oneGrid[y][x] ? "open" : "blocked");
+          rowDiv.appendChild(cellDiv);
+        }
+        gridDisplay.appendChild(rowDiv);
+      }
     }
   </script>
 </body>
