@@ -34,12 +34,16 @@
       width: 20px;
       height: 20px;
       border: 1px solid #ddd;
+      box-sizing: border-box;
     }
     .open {
       background-color: #aef;
     }
     .blocked {
       background-color: #333;
+    }
+    .percolated {
+      background-color: #0077ff;
     }
   </style>
 </head>
@@ -86,14 +90,16 @@
         return grid;
       }
 
-      function hasPercolation(grid) {
+      function findPercolationPath(grid) {
         const visited = Array.from({ length: Y }, () => Array(X).fill(false));
+        const path = Array.from({ length: Y }, () => Array(X).fill(false));
         const queue = [];
 
         for (let x = 0; x < X; x++) {
           if (grid[0][x]) {
             queue.push([0, x]);
             visited[0][x] = true;
+            path[0][x] = true;
           }
         }
 
@@ -103,23 +109,24 @@
 
         while (queue.length > 0) {
           const [y, x] = queue.shift();
-          if (y === Y - 1) return true;
+          if (y === Y - 1) return path;
           for (const [dy, dx] of directions) {
             const ny = y + dy;
             const nx = x + dx;
             if (ny >= 0 && ny < Y && nx >= 0 && nx < X && grid[ny][nx] && !visited[ny][nx]) {
               visited[ny][nx] = true;
+              path[ny][nx] = true;
               queue.push([ny, nx]);
             }
           }
         }
-        return false;
+        return null;
       }
 
-      // Run simulation
+      // Run Monte Carlo simulation
       for (let i = 0; i < N; i++) {
         const grid = createGrid();
-        if (hasPercolation(grid)) success++;
+        if (findPercolationPath(grid)) success++;
       }
 
       const result = success / N;
@@ -133,16 +140,24 @@
       document.getElementById("theoretical").innerText =
         `Theoretical (no interconnection): ${atLeastOne.toFixed(4)}`;
 
-      // Show one random grid
+      // Show single random grid and visualize percolation
       const oneGrid = createGrid();
+      const path = findPercolationPath(oneGrid);
       const gridDisplay = document.getElementById("gridDisplay");
       gridDisplay.innerHTML = "";
+
       for (let y = 0; y < Y; y++) {
         const rowDiv = document.createElement("div");
         rowDiv.className = "row";
         for (let x = 0; x < X; x++) {
           const cellDiv = document.createElement("div");
-          cellDiv.className = "cell " + (oneGrid[y][x] ? "open" : "blocked");
+          if (!oneGrid[y][x]) {
+            cellDiv.className = "cell blocked";
+          } else if (path && path[y][x]) {
+            cellDiv.className = "cell percolated";
+          } else {
+            cellDiv.className = "cell open";
+          }
           rowDiv.appendChild(cellDiv);
         }
         gridDisplay.appendChild(rowDiv);
@@ -151,3 +166,4 @@
   </script>
 </body>
 </html>
+
